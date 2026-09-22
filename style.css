@@ -126,40 +126,69 @@ h1, h2, h3 {
 }
 
 /* ---------- Header ---------- */
+/* Transparent + full-width at the top of the page; once you scroll past
+   the hero, the bar solidifies, gets a shadow, and insets from the
+   viewport edges. The outer .site-header stays full-bleed and fixed —
+   only the inner .header-bar carries the background and side margin,
+   which is what creates the "floating pill" effect. */
 
 .site-header {
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 50;
-  background: var(--white);
-  border-bottom: 1px solid var(--line);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding-top: 14px;
+  background: transparent;
+  pointer-events: none; /* let clicks pass through the transparent edges */
 }
 
-.site-header .wrap {
+.header-bar {
+  pointer-events: auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 76px;
+  height: 64px;
+  margin: 0 auto;
+  max-width: var(--max-w);
+  width: calc(100% - 32px); /* guarantees a side gap even on narrow screens */
+  padding: 0 22px;
+  border-radius: 14px;
+  background: transparent;
+  box-shadow: none;
+  transition: background-color 380ms ease, box-shadow 380ms ease, backdrop-filter 380ms ease;
+}
+
+/* Solid state, added by JS once the page has scrolled past a threshold */
+.site-header.is-scrolled .header-bar {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(16, 27, 51, 0.12);
 }
 
 .wordmark {
   font-family: var(--font-display);
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--blue-deep);
+  color: var(--white);
   text-decoration: none;
   display: flex;
   align-items: baseline;
   gap: 0.5em;
+  transition: color 380ms ease;
 }
+.site-header.is-scrolled .wordmark { color: var(--blue-deep); }
 
 .wordmark span {
   font-family: var(--font-body);
   font-size: 0.68rem;
   font-weight: 700;
-  color: var(--blue);
+  color: var(--gold);
   letter-spacing: 0.03em;
+  transition: color 380ms ease;
 }
+.site-header.is-scrolled .wordmark span { color: var(--blue); }
 
 .main-nav {
   display: flex;
@@ -168,22 +197,30 @@ h1, h2, h3 {
 }
 
 .main-nav a {
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
   font-size: 0.92rem;
   font-weight: 500;
+  transition: color 380ms ease;
 }
-.main-nav a:hover { color: var(--blue-deep); }
+.site-header.is-scrolled .main-nav a { color: var(--text-muted); }
+.main-nav a:hover { color: var(--white); }
+.site-header.is-scrolled .main-nav a:hover { color: var(--blue-deep); }
 
 .nav-toggle {
   display: none;
   background: none;
-  border: 1px solid var(--line);
-  color: var(--blue-deep);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: var(--white);
   border-radius: 3px;
   padding: 8px 10px;
   font-size: 0.85rem;
   cursor: pointer;
+  transition: color 380ms ease, border-color 380ms ease;
+}
+.site-header.is-scrolled .nav-toggle {
+  border-color: var(--line);
+  color: var(--blue-deep);
 }
 
 /* ---------- Hero ---------- */
@@ -191,7 +228,9 @@ h1, h2, h3 {
 .hero {
   background: var(--blue-deep);
   color: var(--text-on-blue);
-  padding: clamp(48px, 8vw, 88px) 0 clamp(56px, 9vw, 100px);
+  /* extra top padding clears the floating header, which now overlays
+     the hero instead of sitting in normal document flow */
+  padding: clamp(112px, 8vw, 152px) 0 clamp(56px, 9vw, 100px);
   position: relative;
   overflow: hidden;
 }
@@ -638,18 +677,24 @@ blockquote.pull cite {
 
   .main-nav {
     position: absolute;
-    top: 76px;
-    left: 0;
-    right: 0;
+    top: 78px;
+    left: 16px;
+    right: 16px;
     background: var(--white);
     flex-direction: column;
     align-items: flex-start;
-    padding: 18px var(--gutter) 26px;
-    border-bottom: 1px solid var(--line);
+    padding: 18px 22px 26px;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(16, 27, 51, 0.14);
     display: none;
+    pointer-events: auto;
   }
   .main-nav.is-open { display: flex; }
   .main-nav a { padding: 8px 0; width: 100%; }
+  /* Open menu always sits on a solid white panel, so its links stay dark
+     regardless of whether the header itself has scrolled solid yet. */
+  .main-nav.is-open a { color: var(--text-muted); }
+  .main-nav.is-open a:hover { color: var(--blue-deep); }
   .nav-toggle { display: inline-flex; }
 }
 
